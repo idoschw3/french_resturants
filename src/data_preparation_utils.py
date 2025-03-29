@@ -1,5 +1,5 @@
 import pandas as pd
-
+import re
 
 # Function to load data based on file extension
 def load_data(filepath):
@@ -12,6 +12,17 @@ def load_data(filepath):
     # If the file format is unsupported, raise an error
     else:
         raise ValueError("Unsupported file type")
+
+
+# Function to filter the dataframe by a specific value in a given column
+def filter_rows_by_column_value(df, column, value, clean_func=None):
+    # If a cleaning function is provided, apply it to the column and the value
+    if clean_func:
+        df[column] = df[column].apply(clean_func)
+        value = clean_func(value)
+
+    # Return only the rows where the column matches the value
+    return df[df[column] == value].copy()
 
 
 # Function to drop specified columns from a DataFrame
