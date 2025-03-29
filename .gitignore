@@ -1,0 +1,29 @@
+# Ignore data and output folders
+data/
+output/
+
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore Python bytecode and cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Ignore virtual environments
+.env/
+.venv/
+
+# Ignore build artifacts (if any packaging tools are used)
+build/
+dist/
+*.egg-info/
+
+# IDE/editor settings (optional but helpful if using one)
+.vscode/
+.idea/
+
+# OS-specific hidden files
+.DS_Store
+Thumbs.db
