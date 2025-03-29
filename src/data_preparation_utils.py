@@ -25,17 +25,38 @@ def filter_rows_by_column_value(df, column, value, clean_func=None):
     return df[df[column] == value].copy()
 
 
-# Function to drop specified columns from a DataFrame
-def drop_and_save_columns(df, cols):
-    # If a single column name is given as a string, drop it using axis=1
+# Function to drop specified columns from a DataFrame and store them separately
+def drop_and_save_columns(df, cols, dropped_df=None):
+    """
+    Drops columns from the given DataFrame and appends them to a separate DataFrame.
+
+    Args:
+        df (pd.DataFrame): The original DataFrame.
+        cols (str or list): Column name or list of column names to drop.
+        dropped_df (pd.DataFrame, optional): A separate DataFrame to collect dropped columns.
+
+    Returns:
+        tuple: (df_after_dropping, dropped_columns_df)
+    """
+    # Normalize cols to list
     if isinstance(cols, str):
-        return df.drop(cols, axis=1)
-    # If a list of column names is given, drop all specified columns
-    elif isinstance(cols, list):
-        return df.drop(columns=cols)
-    # If the input is neither a string nor a list, raise an error
-    else:
+        cols = [cols]
+    elif not isinstance(cols, list):
         raise TypeError("`cols` must be a string or a list of strings")
+
+    # Extract dropped columns
+    dropped = df[cols].copy()
+
+    # Drop from original DataFrame
+    df = df.drop(columns=cols)
+
+    # Append dropped columns to dropped_df
+    if dropped_df is not None:
+        dropped_df = pd.concat([dropped_df, dropped], axis=1)
+    else:
+        dropped_df = dropped
+
+    return df, dropped_df
 
 
 # Function to clean and standardize text entries
