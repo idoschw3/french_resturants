@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import os
 
 # Function to load data based on file extension
 def load_data(filepath):
@@ -25,36 +26,44 @@ def filter_rows_by_column_value(df, column, value, clean_func=None):
     return df[df[column] == value].copy()
 
 
-# Function to drop specified columns from a DataFrame and store them separately
-def drop_and_save_columns(df, cols, dropped_df=None):
-    """
-    Drops columns from the given DataFrame and appends them to a separate DataFrame.
+# Function to drop one or more columns from a DataFrame, and raise error if any don't exist
+def drop_and_save_columns(df, cols, dropped_df=None, save_path=None):
 
-    Args:
-        df (pd.DataFrame): The original DataFrame.
-        cols (str or list): Column name or list of column names to drop.
-        dropped_df (pd.DataFrame, optional): A separate DataFrame to collect dropped columns.
+    # Set default save path if none provided
+    if save_path is None:
+        save_path = r"C:\Users\idosc\Documents\GitHub\french_resturants\data\processed\dropped_columns.csv"
 
-    Returns:
-        tuple: (df_after_dropping, dropped_columns_df)
-    """
-    # Normalize cols to list
+    # Normalize input to a list of column names
     if isinstance(cols, str):
         cols = [cols]
-    elif not isinstance(cols, list):
+    elif isinstance(cols, list):
+        if not all(isinstance(col, str) for col in cols):
+            raise TypeError("All column names must be strings")
+    else:
         raise TypeError("`cols` must be a string or a list of strings")
+
+    # Check that all columns exist in the DataFrame
+    missing = [col for col in cols if col not in df.columns]
+    if missing:
+        raise ValueError(f"The following columns were not found in the DataFrame: {missing}")
 
     # Extract dropped columns
     dropped = df[cols].copy()
 
-    # Drop from original DataFrame
+    # Drop them from the original DataFrame
     df = df.drop(columns=cols)
 
-    # Append dropped columns to dropped_df
+    # Append to dropped_df if it's already collecting others
     if dropped_df is not None:
         dropped_df = pd.concat([dropped_df, dropped], axis=1)
     else:
         dropped_df = dropped
+
+    # Make sure the directory exists
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+    # Save to CSV
+    dropped_df.to_csv(save_path, index=False)
 
     return df, dropped_df
 
