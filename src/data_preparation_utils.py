@@ -28,7 +28,6 @@ def filter_rows_by_column_value(df, column, value, clean_func=None):
 
 # Function to drop one or more columns from a DataFrame, and raise error if any don't exist
 def drop_and_save_columns(df, cols, dropped_df=None, save_path=None):
-
     # Set default save path if none provided
     if save_path is None:
         save_path = r"C:\Users\idosc\Documents\GitHub\french_resturants\data\processed\dropped_columns.csv"
@@ -53,16 +52,21 @@ def drop_and_save_columns(df, cols, dropped_df=None, save_path=None):
     # Drop them from the original DataFrame
     df = df.drop(columns=cols)
 
-    # Append to dropped_df if it's already collecting others
-    if dropped_df is not None:
-        dropped_df = pd.concat([dropped_df, dropped], axis=1)
+    # If the file already exists, load it and append the new dropped columns
+    if os.path.exists(save_path):
+        existing_dropped_df = pd.read_csv(save_path)
+        dropped_df = pd.concat([existing_dropped_df, dropped], axis=1)
     else:
-        dropped_df = dropped
+        # If dropped_df is already provided, append new dropped columns to it
+        if dropped_df is not None:
+            dropped_df = pd.concat([dropped_df, dropped], axis=1)
+        else:
+            dropped_df = dropped
 
-    # Make sure the directory exists
+    # Ensure the directory exists
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    # Save to CSV
+    # Save the combined dropped columns to CSV
     dropped_df.to_csv(save_path, index=False)
 
     return df, dropped_df
