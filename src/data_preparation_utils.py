@@ -89,3 +89,28 @@ def clean_text(text):
     text = re.sub(r'[^a-z\s,]', '', text)
     # Final strip to clean any remaining leading/trailing spaces
     return text.strip()
+
+def extract_city(address):
+    """
+    Extracts the city from an address string.
+    Assumes the address format is:
+    '... , <postal code> <City Name> France'
+    """
+    if pd.isnull(address):
+        return None
+    # Split on comma; assume the second part contains postal code, city, and country
+    parts = address.split(',')
+    if len(parts) < 2:
+        return None
+    # Get the second part and split by whitespace
+    second_part = parts[1].strip()  # e.g., "87510 Saint-Jouvent France"
+    words = second_part.split()
+    # Check if we have enough parts: postal code, city, and country
+    if len(words) < 3:
+        return None
+    # The city is assumed to be all words between the postal code (first word) and the country (last word)
+    city_words = words[1:-1]
+    city = ' '.join(city_words)
+    # Remove any special characters (like hyphens) and convert to lowercase
+    city_clean = re.sub(r'[^a-zA-Z\s]', '', city).lower()
+    return city_clean
