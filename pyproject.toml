@@ -1,6 +1,9 @@
 [tool.poetry]
 name = "french-resturants"
 version = "0.1.0"
+packages = [
+    { include = "src" }
+]
 description = ""
 authors = ["idoschw3 <ido.schwartz.il@gmail.com>"]
 readme = "README.md"
