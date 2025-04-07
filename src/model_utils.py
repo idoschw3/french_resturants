@@ -43,52 +43,53 @@ def convert_object_columns(data, uniqueness_threshold=0.5, length_threshold=30, 
     Converts object columns in a DataFrame to the desired types without handling nulls.
 
     Rules:
-      - If an object column's unique values (ignoring nulls) are only {"Y", "N"}, it is converted to boolean.
-      - If the column name is in force_category, convert it to a category.
+      - If an object column's unique (non-null) values are exactly {"Y", "N"}, convert it to boolean.
       - If the column name is in force_string, leave it as a string.
-      - Else if the column has a high unique ratio (> uniqueness_threshold)
-        or at least one value longer than length_threshold characters,
-        leave it as a string (object dtype).
-      - Otherwise, convert the column to categorical.
+      - If the column name is in force_category, convert it to a category.
+      - Otherwise, calculate:
+            unique_ratio = (number of unique values / total rows)
+            max_length = maximum string length in the column.
+        If unique_ratio > uniqueness_threshold OR max_length > length_threshold,
+            leave the column as a string.
+        Otherwise, convert the column to categorical.
 
     Parameters:
       data: The input DataFrame.
       uniqueness_threshold: Proportion threshold for uniqueness (default 0.5).
       length_threshold: Maximum length threshold (default 30 characters).
-      force_category: List of column names that should always be converted to category.
-      force_string: List of column names that should always be left as string.
+      force_category: List of column names to always convert to category.
+      force_string: List of column names to always leave as string.
 
     Returns:
       The DataFrame with updated column types.
     """
     if force_category is None:
-        force_category = []  # No forced category columns by default
+        force_category = []
     if force_string is None:
-        force_string = []  # No forced string columns by default
+        force_string = []
 
-    # Iterate over all columns in the DataFrame
     for col in data.columns:
-        # Only process columns of object dtype
         if data[col].dtype == 'object':
-            # Get the set of unique non-null values
-            unique_vals = set(data[col].dropna().unique())
-
-            # Rule 1: If the column's unique values are only "Y" and "N", convert to boolean.
-            if unique_vals.issubset({"Y", "N"}):
-                data[col] = data[col].map({"Y": True, "N": False}).astype("boolean")
-            # Rule 2: If the column is forced to be a category, convert to category.
+            # If the column is forced to be left as string, convert it to string immediately.
+            if col in force_string:
+                data[col] = data[col].astype(str)
+            # Else, if the column is forced to be a category, do so.
             elif col in force_category:
                 data[col] = data[col].astype("category")
-            # Rule 3: If the column is forced to be left as string, convert to string.
-            elif col in force_string:
-                data[col] = data[col].astype(str)
             else:
-                # Calculate the unique ratio and maximum string length.
-                unique_ratio = data[col].nunique() / len(data[col])
-                max_length = data[col].str.len().max()
-                # If high unique ratio or long values, leave as string; otherwise, convert to category.
-                if unique_ratio > uniqueness_threshold or max_length > length_threshold:
-                    data[col] = data[col].astype(str)
+                # If the column's non-null unique values are only "Y" and "N", convert to boolean.
+                unique_vals = set(data[col].dropna().unique())
+                if unique_vals.issubset({"Y", "N"}):
+                    data[col] = data[col].map({"Y": True, "N": False}).astype("boolean")
                 else:
-                    data[col] = data[col].astype("category")
+                    # For the remaining columns, calculate the unique ratio and maximum string length.
+                    series_str = data[col].astype(str)
+                    unique_ratio = series_str.nunique() / len(series_str)
+                    max_length = series_str.str.len().max()
+                    # If high unique ratio or long strings, leave as string.
+                    if unique_ratio > uniqueness_threshold or max_length > length_threshold:
+                        data[col] = series_str  # leave as string
+                    else:
+                        # Otherwise, convert to category.
+                        data[col] = data[col].astype("category")
     return data
