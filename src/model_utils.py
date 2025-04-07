@@ -72,7 +72,7 @@ def convert_object_columns(data, uniqueness_threshold=0.5, length_threshold=30, 
         if data[col].dtype == 'object':
             # First, if the column is in force_string, convert to string and skip further checks.
             if col in force_string:
-                data[col] = data[col].astype(str)
+                data[col] = data[col].astype('string')
                 continue
 
             # If the column is in force_category, convert it to category and skip further checks.
