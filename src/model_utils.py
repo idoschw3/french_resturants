@@ -94,3 +94,33 @@ def convert_object_columns(data, uniqueness_threshold=0.5, length_threshold=30, 
                 else:
                     data[col] = data[col].astype("category")
     return data
+
+
+def target_encode_columns(df, target_col, columns=None):
+    """
+    Target encodes the specified string columns in the DataFrame by replacing their values
+    with the mean of the target variable for each unique category.
+
+    Parameters:
+      df: DataFrame containing the data.
+      target_col: The name of the target column (must be numeric).
+      columns: Optional list of column names to target encode.
+               If not provided, the function will use all columns with dtype 'string'.
+
+    Returns:
+      The DataFrame with target encoded columns (original columns are overwritten).
+    """
+    # If columns are not provided, select all columns with the new string dtype,
+    # falling back to object columns if needed.
+    if columns is None:
+        columns = df.select_dtypes(include=["string"]).columns.tolist()
+        if not columns:
+            columns = df.select_dtypes(include=["object"]).columns.tolist()
+
+    for col in columns:
+        # Compute the mapping: for each unique value in col, get the mean of the target variable.
+        mapping = df.groupby(col)[target_col].mean().to_dict()
+        # Replace the column values with their corresponding mean target.
+        df[col] = df[col].map(mapping)
+
+    return df
