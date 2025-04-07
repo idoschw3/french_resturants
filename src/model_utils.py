@@ -43,22 +43,22 @@ def convert_object_columns(data, uniqueness_threshold=0.5, length_threshold=30, 
     Converts object columns in a DataFrame to the desired types without handling nulls.
 
     Rules:
-      - If an object column's unique (non-null) values are exactly {"Y", "N"}, convert it to boolean.
-      - If the column name is in force_string, leave it as a string.
-      - If the column name is in force_category, convert it to a category.
-      - Otherwise, calculate:
+      - If an object column's unique (non-null) values are exactly {"Y", "N"}, it is converted to boolean.
+      - If the column name is in force_string, it is immediately converted to a string.
+      - If the column name is in force_category, it is converted to a category.
+      - Otherwise, it calculates:
             unique_ratio = (number of unique values / total rows)
             max_length = maximum string length in the column.
         If unique_ratio > uniqueness_threshold OR max_length > length_threshold,
-            leave the column as a string.
-        Otherwise, convert the column to categorical.
+            the column is left as a string.
+        Otherwise, it is converted to categorical.
 
     Parameters:
       data: The input DataFrame.
       uniqueness_threshold: Proportion threshold for uniqueness (default 0.5).
       length_threshold: Maximum length threshold (default 30 characters).
       force_category: List of column names to always convert to category.
-      force_string: List of column names to always leave as string.
+      force_string: List of column names to always remain as string.
 
     Returns:
       The DataFrame with updated column types.
@@ -70,26 +70,27 @@ def convert_object_columns(data, uniqueness_threshold=0.5, length_threshold=30, 
 
     for col in data.columns:
         if data[col].dtype == 'object':
-            # If the column is forced to be left as string, convert it to string immediately.
+            # First, if the column is in force_string, convert to string and skip further checks.
             if col in force_string:
                 data[col] = data[col].astype(str)
-            # Else, if the column is forced to be a category, do so.
-            elif col in force_category:
+                continue
+
+            # If the column is in force_category, convert it to category and skip further checks.
+            if col in force_category:
                 data[col] = data[col].astype("category")
+                continue
+
+            # If the column's unique (non-null) values are only "Y" and "N", convert to boolean.
+            unique_vals = set(data[col].dropna().unique())
+            if unique_vals.issubset({"Y", "N"}):
+                data[col] = data[col].map({"Y": True, "N": False}).astype("boolean")
             else:
-                # If the column's non-null unique values are only "Y" and "N", convert to boolean.
-                unique_vals = set(data[col].dropna().unique())
-                if unique_vals.issubset({"Y", "N"}):
-                    data[col] = data[col].map({"Y": True, "N": False}).astype("boolean")
+                # Otherwise, use heuristics to decide whether to leave as string or convert to category.
+                series_str = data[col].astype(str)
+                unique_ratio = series_str.nunique() / len(series_str)
+                max_length = series_str.str.len().max()
+                if unique_ratio > uniqueness_threshold or max_length > length_threshold:
+                    data[col] = series_str  # leave as string
                 else:
-                    # For the remaining columns, calculate the unique ratio and maximum string length.
-                    series_str = data[col].astype(str)
-                    unique_ratio = series_str.nunique() / len(series_str)
-                    max_length = series_str.str.len().max()
-                    # If high unique ratio or long strings, leave as string.
-                    if unique_ratio > uniqueness_threshold or max_length > length_threshold:
-                        data[col] = series_str  # leave as string
-                    else:
-                        # Otherwise, convert to category.
-                        data[col] = data[col].astype("category")
+                    data[col] = data[col].astype("category")
     return data
