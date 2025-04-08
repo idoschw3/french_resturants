@@ -31,6 +31,42 @@ This project aims to predict whether a restaurant in **France** will be successf
 
 ---
 
+## 🧠 Code Structure
+
+The project is organized into two main directories for code and experimentation:
+
+### 🗂️ `src/` — Utility Functions
+This folder contains Python modules with **reusable functions** developed for the project, such as:
+- Data preprocessing
+- Feature encoding
+- Data splitting (`prepare_data`)
+- Utility logic used across notebooks
+
+> All key logic is modularized here to keep the notebooks clean and focused.
+
+### 📓 `notebooks/` — Main Project Work
+All core modeling, analysis, and visualizations were performed inside Jupyter notebooks:
+- 📊 Exploratory analysis
+- ⚙️ Model training
+- 🔍 Feature selection
+- 📈 Performance comparisons
+- 💾 Model saving and outputs
+
+These notebooks are well-commented and structured to reflect the full pipeline from raw data to final model evaluation.
+
+---
+
+## 📁 Folder Structure (Google Drive)
+
+- `/data/raw_data` – Original Kaggle data
+- `/data/processed_data` – Cleaned and encoded feature sets
+- `/data/external` – Any external data used
+- `/outputs/results` – Feature selection summaries, evaluation metrics
+- `/outputs/figures` – Plots and visualizations
+- `/outputs/models` – Final trained models (`.pkl`) ready to use
+
+---
+
 ## 🛠 Known Issues
 
 - ❌ A compatibility issue was encountered with **XGBoost and Scikit-learn version ≥1.6**, which led to errors related to `__sklearn_tags__`.
