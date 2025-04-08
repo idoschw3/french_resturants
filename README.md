@@ -24,7 +24,7 @@ This project aims to predict whether a restaurant in **France** will be successf
 3. **Review Data Handling**:  
    - All review-related features are saved in `dropped_columns.csv` for future reference.  
    - These features were **excluded from training** because review data is **not available for new restaurants**.
-   - the dropped review columns can be used later to refine the success criteria
+   - The dropped review columns can be used later to refine the success criteria
 4. **Awards Consideration**:  
    - If a restaurant **has moved** and held awards previously, that is preserved.  
    - For new locations or new restaurants, award data is **set to 0 or unknown**.
