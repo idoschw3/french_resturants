@@ -83,17 +83,6 @@ These notebooks are well-commented and structured to reflect the full pipeline f
 
 ---
 
-## 📁 Folder Structure (Google Drive)
-
-- `/data/raw_data` – Original Kaggle data
-- `/data/processed_data` – Cleaned and encoded feature sets
-- `/data/external` – any external data used
-- `/outputs/results` – Feature selection summaries, evaluation metrics
-- `/outputs/figures` – Plots and visualizations
-- `/outputs/models` – Final trained models (`.pkl`) ready to use
-
----
-
 ## 📦 Installation
 
 You can set up the project environment using either **Poetry** or `requirements.txt`.
